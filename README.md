@@ -25,7 +25,8 @@ wsld.exe -d debian -i debian_d
 wsld.exe -d tianon/qemu -i qemu_d
 `` 
 
-Also, optionally, you can pass the version (1 for WSL1 and 2 for WSL2) or the installation directory of the WSL image.<br>
+Also, optionally, you can pass the version (1 for WSL1 and 2 for WSL2)<br>
+or the installation directory of the WSL image.<br>
 
 If there is no version, it will take the default for your wsl installation.<br>
 ~~~
@@ -45,7 +46,8 @@ If there is no version, it will take the default for your wsl installation.<br>
 
 ## Obtaining access to the installed image
 
-The  usual "wsl" command can log into any installed distribution, so if we installed a debian image as "debian_d", we just need to do the following command: 
+The  usual "wsl" command can log into any installed distribution,<br>
+so if we installed a debian image as "debian_d", we just need to do the following command: 
  
 ``
 wsl -d debian_d
