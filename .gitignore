@@ -69,7 +69,8 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
-
+/packages/
+!packages/repositories.config
 # Chutzpah Test files
 _Chutzpah*
 
