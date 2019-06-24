@@ -7,6 +7,7 @@ It allows to just grab any dockerhub image and install it as a WSL subsystem or 
 
 1.- WSL Installed, either 1 or 2 <br>
 2.- A default WSL image (when doing bash) that has tar installed.<br>
+3.- Tested in windows build 18922, you need an upgraded "wsl" to work. If you do wsl -l -v and it works, you are good to go.
 # Usage
 
 The usual command you want to do is:<br>
