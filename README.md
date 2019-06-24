@@ -20,11 +20,11 @@ wsld.exe -d <distroname> -i <dockerimage>
 <br>
 Some examples are:<br><br>
  ``
-wsld.exe -d debian -i debian_d 
+wsld.exe -d debian_d  -i  debian
 `` 
 <br>
 ``
-wsld.exe -d tianon/qemu -i qemu_d
+wsld.exe -d qemu_d  -i tianon/qemu
 `` 
 <br>
 Also, optionally, you can pass the version (1 for WSL1 and 2 for WSL2) or the installation directory of the WSL image.<br>
