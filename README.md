@@ -3,9 +3,9 @@
 This program was created with te intention of doing sharing and installing wsl machines more easily! <br>
 It allows to just grab any dockerhub image and install it as a WSL subsystem or WSL2 Virtual machine.<br>
 
-#Example
-Go into asciinema to see how it works!
-https://asciinema.org/a/EaGqIVG9IbWJ6iSw70Sl7eQha
+# Example
+Go into asciinema to see how it works! <br>
+https://asciinema.org/a/EaGqIVG9IbWJ6iSw70Sl7eQha <br>
 
 # Requirements
 
