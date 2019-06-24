@@ -63,3 +63,6 @@ wsl -l -v
 `` 
 <br><br>
 This command will show you all the installed distributions and its versions.
+
+This program is free to use, but, if you want to invite me to a coffe, feel free :)
+https://www.paypal.me/rucadi
