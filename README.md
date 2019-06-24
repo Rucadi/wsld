@@ -16,8 +16,8 @@ wsld.exe -d <distroname> -i <dockerimage>
 **-d** and **-i** are the only required arguments. <br>
 *distroname* will be the name which will be registered to WSL. <br>
 *dockerimage* is the usual <repository/name:tag>, as if you were to do a docker pull.<br>
-
-Some examples are:<br>
+<br>
+Some examples are:<br><br>
  ``
 wsld.exe -d debian -i debian_d 
 `` 
@@ -26,9 +26,8 @@ wsld.exe -d debian -i debian_d
 wsld.exe -d tianon/qemu -i qemu_d
 `` 
 <br>
-Also, optionally, you can pass the version (1 for WSL1 and 2 for WSL2)<br>
-or the installation directory of the WSL image.<br>
-
+Also, optionally, you can pass the version (1 for WSL1 and 2 for WSL2) or the installation directory of the WSL image.<br>
+<br>
 If there is no version, it will take the default for your wsl installation.<br>
 ~~~
   -o, --directory     Directory to install.
@@ -46,17 +45,17 @@ If there is no version, it will take the default for your wsl installation.<br>
 
 
 ## Obtaining access to the installed image
-
+<br>
 The  usual "wsl" command can log into any installed distribution,<br>
-so if we installed a debian image as "debian_d", we just need to do the following command: 
- 
+so if we installed a debian image as "debian_d", we just need to do the following command: <br>
 ``
 wsl -d debian_d
 `` 
-
+<br>
 Also, check if the image has been installed with the command 
-
+<br>
 ``
 wsl -l -v
 `` 
+<br>
 This command will show you all the installed distributions and its versions.
