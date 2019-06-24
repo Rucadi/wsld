@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using System.Net.Http;
+using wsld_cs.wsl;
+using System.IO;
 
 namespace wsld_cs
 {
@@ -15,24 +17,17 @@ namespace wsld_cs
 
         public class CmdOptions
         {
-            [Option('f', "file", Required = false, HelpText = "Path of the Dockerfile.")]
-            public string Dockername { get; set; }
+            [Option('o', "directory", Required = false, HelpText = "Directory to install.")]
+            public string InstallDir { get; set; }
 
-            [Option('t', "tag", Required = false, HelpText = "Name and optionally a tag in the ‘name:tag’ format.")]
-            public string Tag { get; set; }
+            [Option('i', "image", Required = true, HelpText = "Docker Image to Install.")]
+            public string Dockerimage { get; set; }
 
-            [Option('p', "pull", Required = false, HelpText = "Always attempt to pull a newer version of the image.")]
-            public bool Pull { get; set; }
+            [Option('d', "distroname", Required = true, HelpText = "Name to give to the new distro")]
+            public string Distroname { get; set; }
 
-            [Option('q', "quiet", Required = false, HelpText = "Suppress the build output and print image ID on success.")]
-            public bool Quiet { get; set; }
-
-            [Option('b', "build-arg", Required = false, HelpText = "Suppress the build output and print image ID on success.")]
-            public string BuldARG { get; set; }
-
-            [Option('q', "add-host", Required = false, HelpText = "Suppress the build output and print image ID on success.")]
-            public string Hosts { get; set; }
-
+            [Option('v', "version", Required = false, HelpText = "Version for the new distro, the default is the wsl default, set 1 to WSL1, 2 to WSL2.")]
+            public int Version { get; set; }
         }
         static void Main(string[] args)
         {
@@ -42,20 +37,47 @@ namespace wsld_cs
                 options => {
                     ParsedMain(options);
                 });
+        }
 
 
-            Console.ReadKey();
 
-            // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
+
+        private static string[] Get_Repo_Dist_Tag(string all)
+        {
+
+            string[] repository_distrotag = all.Split('/');
+            int rlen = repository_distrotag.Length;
+            string repository = rlen > 1 ? repository_distrotag[0] : "library";
+            string distrotag = rlen > 1 ? repository_distrotag[1] : repository_distrotag[0];
+
+
+            string[] distro_tag = distrotag.Split(':');
+            int dlen = distro_tag.Length;
+
+            string distro = distro_tag[0];
+            string tag = dlen > 1 ? distro_tag[1] : "latest";
+
+
+            string[] ret = { repository, distro, tag };
+            return  ret ;
+
         }
 
         private static void ParsedMain(CmdOptions options)
         {
-            Console.WriteLine($"Name used {options.Dockername}");
-            Console.WriteLine($"Name used {options.Tag}");
+            string img = options.Dockerimage;
+            var rdt = Get_Repo_Dist_Tag(img);
 
-            Docker dr = new Docker();
-            dr.DebugTest();
+            string repo = rdt[0];
+            string distroname = rdt[1];
+            string tag = rdt[2];
+
+            if(options.InstallDir!=null)
+            UserConfig.install_dir = options.InstallDir;
+            
+
+            string install_tar_path = Docker.DownloadAndGenerateImage(repo, distroname, tag, options.Distroname);
+            Wsl.InstallImage(install_tar_path, Path.Combine(UserConfig.install_dir,options.Distroname), options.Distroname, options.Version);
 
         }
     }
