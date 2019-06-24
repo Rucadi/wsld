@@ -55,7 +55,7 @@ wsl -d debian_d
 `` 
 <br>
 Also, check if the image has been installed with the command 
-<br>
+<br><br>
 
 ``
 wsl -l -v
