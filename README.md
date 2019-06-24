@@ -9,10 +9,10 @@ It allows to just grab any dockerhub image and install it as a WSL subsystem or 
 2.- A default WSL image (when doing bash) that has tar installed.<br>
 # Usage
 
-The usual command you want to do is:
+The usual command you want to do is:<br>
 ``
 wsld.exe -d <distroname> -i <dockerimage> 
-`` 
+`` <br>
 **-d** and **-i** are the only required arguments. <br>
 *distroname* will be the name which will be registered to WSL. <br>
 *dockerimage* is the usual <repository/name:tag>, as if you were to do a docker pull.<br>
@@ -21,10 +21,11 @@ Some examples are:<br>
  ``
 wsld.exe -d debian -i debian_d 
 `` 
+<br>
 ``
 wsld.exe -d tianon/qemu -i qemu_d
 `` 
-
+<br>
 Also, optionally, you can pass the version (1 for WSL1 and 2 for WSL2)<br>
 or the installation directory of the WSL image.<br>
 
