@@ -5,7 +5,7 @@ It allows to just grab any dockerhub image and install it as a WSL subsystem or 
 
 # Requirements
 
-1.- WSL Installed, either 1 or 2
+1.- WSL Installed, either 1 or 2 <br>
 2.- A default WSL image (when doing bash) that has tar installed.
 # Usage
 
