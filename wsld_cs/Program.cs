@@ -31,7 +31,6 @@ namespace wsld_cs
         }
         static void Main(string[] args)
         {
-            // or (2) build and configure instance
             var cmdOptions = Parser.Default.ParseArguments<CmdOptions>(args);
             cmdOptions.WithParsed(
                 options => {
