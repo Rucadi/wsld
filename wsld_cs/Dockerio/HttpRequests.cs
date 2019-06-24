@@ -32,10 +32,10 @@ namespace wsld_cs.Dockerio
 
                 return responseBody;
             }
-            catch (HttpRequestException e)
+            catch (HttpRequestException)
             {
                 Console.WriteLine("Can't find the image. exiting...");
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
             return null;
         }
@@ -53,10 +53,10 @@ namespace wsld_cs.Dockerio
 
                 return responseBody;
             }
-            catch (HttpRequestException e)
+            catch (HttpRequestException)
             {
                 Console.WriteLine("Can't find the image. exiting...");
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
             return "";
         }
@@ -77,10 +77,10 @@ namespace wsld_cs.Dockerio
 
                 return responseBody;
             }
-            catch (HttpRequestException e)
+            catch (HttpRequestException)
             {
                 Console.WriteLine("Can't find the image. exiting...");
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
             return responseBody;
         }
