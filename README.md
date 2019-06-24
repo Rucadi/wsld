@@ -5,8 +5,7 @@ It allows to just grab any dockerhub image and install it as a WSL subsystem or 
 
 #Example
 Go into asciinema to see how it works!
-[![asciicast](https://asciinema.org/a/170142.png)](https://asciinema.org/a/EaGqIVG9IbWJ6iSw70Sl7eQha)
-
+https://asciinema.org/a/EaGqIVG9IbWJ6iSw70Sl7eQha
 
 # Requirements
 
