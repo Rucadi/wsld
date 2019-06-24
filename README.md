@@ -64,5 +64,6 @@ wsl -l -v
 <br><br>
 This command will show you all the installed distributions and its versions.
 
-This program is free to use, but, if you want to invite me to a coffe, feel free :)
+This program is free to use, but, if you want to invite me to a coffe, feel free :) <br>
+<img src="https://logos-download.com/wp-content/uploads/2016/03/Pay_Pal_logotype_logo_emblem_2.png" width="100" height="100"> <br>
 https://www.paypal.me/rucadi
