@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("wsld_cs")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("wsld")]
+[assembly: AssemblyDescription("A binary that allows to download and install docker images")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("wsld_cs")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("Rucadi")]
+[assembly: AssemblyProduct("wsld")]
+[assembly: AssemblyCopyright("Copyright © Ruben Cano Diaz  2019")]
+[assembly: AssemblyTrademark("none")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2bfa4773-25f3-4a13-af34-9bb9f2af3222")]
+[assembly: Guid("2bfa4773-25f3-4af3-af34-1db9f2af3af3")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.0.1.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

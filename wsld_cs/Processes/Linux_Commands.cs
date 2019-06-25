@@ -36,7 +36,7 @@ namespace wsld_cs.Linux
 
         static public string Tar_rootfs(string distro_name, string appendix)
         {
-           return "tar cf " + distro_name + "_" + appendix + "_rootfs.tar.gz *";
+           return "tar cf " + distro_name + "_" + appendix + "_rootfs.tar.gz * || :";
         }
 
         static public string RootfsName(string distro_name, string appendix)

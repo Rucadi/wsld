@@ -9,7 +9,6 @@ using System.Net;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using cmd;
 using wsld_cs.Dockerio;
 using wsld_cs.Processes;
 using wsld_cs.Files;
@@ -80,7 +79,7 @@ namespace wsld_cs
              };
 
             var command = Linux_Commands.GenerateCommand(commands2);
-           // Console.WriteLine(command);
+            //Console.WriteLine(command);
             Commands.RunProgram(command);
         }
 
