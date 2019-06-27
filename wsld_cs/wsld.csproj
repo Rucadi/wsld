@@ -135,14 +135,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dockerio\DockerInterop.cs" />
     <Compile Include="Dockerio\Docker.cs" />
     <Compile Include="Dockerio\HttpRequests.cs" />
     <Compile Include="Files\Fops.cs" />
+    <Compile Include="Params\DefaultOptions.cs" />
     <Compile Include="Processes\Linux_Commands.cs" />
     <Compile Include="Processes\Commands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserConfig.cs" />
+    <Compile Include="Utils\UserConfig.cs" />
+    <Compile Include="Utils\Utils.cs" />
     <Compile Include="wsl\wsl.cs" />
   </ItemGroup>
   <ItemGroup>

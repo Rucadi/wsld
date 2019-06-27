@@ -13,117 +13,73 @@ using wsld_cs.Dockerio;
 using wsld_cs.Processes;
 using wsld_cs.Files;
 using wsld_cs.Linux;
+using wsld_cs.wsl;
+using wsld.Utils;
 
 namespace wsld_cs
 {
     public class Docker
     {
-        const string docker_pull_api_url = "http://auth.docker.io/token?service=registry.docker.io&scope=repository:";
-        const string docker_register_url = "https://registry-1.docker.io/v2/";
-
-
-        private static void SetupAuth(string repository)
-        {
-            //Console.WriteLine(docker_pull_api_url + repository + ":pull");
-            var res = HttpRequests.GetResponseJson(docker_pull_api_url + repository + ":pull").Result;
-            HttpRequests.ClientSetBearerAndType(res["access_token"].ToString(), "application/vnd.docker.distribution.manifest.v2+json");
-
-        }
-
-        private static JObject AskForLayers(string repository, string tag )
+        public static int DownloadImage( )
         {
 
-            var url = docker_register_url + repository +"/manifests/"+tag;
-            //Console.WriteLine(url);
-            return HttpRequests.GetResponseJson(url).Result;
-        }
-
-        private static JObject GetBlobs(string config, string repository)
-        {
-            string url = docker_register_url + repository+"/blobs/" + config;
-            //Console.WriteLine(url);
-            return HttpRequests.GetResponseJson(url).Result;
-        }
-
-        private static byte[] DownloadLayer(string digest, string repository)
-        {
-            string url = docker_register_url + repository + "/blobs/" + digest;
-            return HttpRequests.GetResponseBytes(url).Result;
-
-        }
-
-
- 
-
-        private static  void GenerateTar(string linux_temporary_folder, string tmp_rootfs_name, string distro_name)
-        {
-            string session_id = UserConfig.session_id;
-            string win10_temporary_folder = UserConfig.linux_windows_temp_path;
-            string win10_imagepath = UserConfig.linux_windows_image_path;
-
-            string[] commands2 =
-            {
-                   Linux_Commands.Change_directory(win10_temporary_folder),
-                   Linux_Commands.Create_directory_tree(linux_temporary_folder),
-                   Linux_Commands.CopyFile(tmp_rootfs_name, linux_temporary_folder),
-                   Linux_Commands.Change_directory(linux_temporary_folder),
-                   Linux_Commands.Untar_rootfs_joined(tmp_rootfs_name, linux_temporary_folder),
-                   Linux_Commands.EraseFile(tmp_rootfs_name),
-                   Linux_Commands.Tar_rootfs(distro_name, session_id),
-                   Linux_Commands.Create_directory_tree(win10_imagepath),
-                   Linux_Commands.CopyFile(Linux_Commands.RootfsName(distro_name, session_id), win10_imagepath),
-                   Linux_Commands.EraseDirectory(linux_temporary_folder),
-                   Linux_Commands.Change_directory(win10_temporary_folder),
-                   Linux_Commands.EraseFile(tmp_rootfs_name)
-
-             };
-
-            var command = Linux_Commands.GenerateCommand(commands2);
-            //Console.WriteLine(command);
-            Commands.RunProgram(command);
-        }
-
-
-        //string config = get_layers["config"]["digest"].ToString();
-        //var blobs = GetBlobs(config, repository);
-        public static string DownloadAndGenerateImage(string repo, string image, string tag, string distro_name)
-        {
-            string session_id = UserConfig.session_id;
-            string repository = repo + "/" + image;
-
-
-            SetupAuth(repository);
-
-
-            string temp_rootfs_name = Linux_Commands.TemporalRootfsName(distro_name, session_id);
-            string win10_temp_file_path = UserConfig.windows_temp_path + temp_rootfs_name;
-
-
-
-            var layers = AskForLayers(repository, tag)["layers"];
+            var layers = HttpRequests.AskForLayers();
 
             Console.WriteLine("Image with " + layers.Count() + " layers");
             Console.WriteLine("Downloading...");
-            int i = 1;
-            foreach (var layer in layers)
+
+            for (int i = 0; i < layers.Count(); ++i)
             {
-                Fops.WriteToFileAppend(DownloadLayer(layer["digest"].ToString(), repository), win10_temp_file_path);
-                Console.WriteLine("Downloaded " + i++ + " of " + layers.Count());
+                var layer = layers.ElementAt(i);
+                Fops.WriteToFileAppend(HttpRequests.DownloadLayer(layer["digest"].ToString()), UserConfig.w_tmp_rootfs_path);
+                Console.WriteLine("Downloaded " + i + 1 + " of " + layers.Count()+ " on: "+ UserConfig.w_tmp_rootfs_path);
             }
-            Console.WriteLine("Downloaded.");
 
-            var linux_temporary_folder = "/tmp/wsld/" + distro_name + session_id;
-            Console.WriteLine("Generating tar...");
-            GenerateTar(linux_temporary_folder, temp_rootfs_name, distro_name);
-            Console.WriteLine("Generated.");
-            File.Delete(win10_temp_file_path);
-
-            return  Path.Combine(UserConfig.windows_image_path,Linux_Commands.RootfsName(distro_name, session_id));
+            Console.WriteLine("Finished! All layers downloaded.");
+            return layers.Count();
         }
 
 
 
+        public static void DownloadAndGenerateImage()
+        {
+            string distro_name  = UserConfig.wsld_distro_name;
+            int count = DownloadImage();
+            if(count > 1)
+            {
+                Linux_Commands.GenerateRootfsTar();
+                File.Delete(UserConfig.w_tmp_rootfs_path);
+            }
+            else
+            {
+                File.Move(UserConfig.w_tmp_rootfs_path, UserConfig.w_rootfs_path);
+            }
+        }
 
+
+
+        public static bool DockerLogin()
+        {
+            Console.WriteLine("\nFor using this feature you must login to Docker");
+            Console.WriteLine();
+            Console.WriteLine("username: ");
+            string user = Console.ReadLine();
+            Console.WriteLine("password: ");
+            var password = Utils.ReadLineMasked();
+            return Commands.DockerLogin("wsld", user, password);
+        }
+
+
+        public static void InstallWsldImage()
+        {
+            Console.WriteLine("WSLD Image will be installed.");
+            Console.WriteLine("This image is needed to perform all the operations of this tool");
+            Console.WriteLine("Touching the contents of the image is not recomended.");
+            UserConfig.generateConfigs("rucadi/wsld:wsld", "", "wsld", 0);
+            DownloadAndGenerateImage();
+            Wsl.InstallImage();
+
+        }
 
     }
 }

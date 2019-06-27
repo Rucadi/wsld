@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using wsld_cs.Processes;
 
 namespace wsld_cs.Linux
 {
@@ -39,14 +40,14 @@ namespace wsld_cs.Linux
            return "tar cf " + distro_name + "_" + appendix + "_rootfs.tar.gz * || :";
         }
 
-        static public string RootfsName(string distro_name, string appendix)
+        static public string RootfsName(string distro_name)
         {
-            return distro_name + "_" + appendix + "_rootfs.tar.gz";
+            return distro_name + "_" + UserConfig.session_id + "_rootfs.tar.gz";
         }
 
-        static public string TemporalRootfsName(string distro_name, string appendix)
+        static public string TemporalRootfsName(string distro_name)
         {
-            return distro_name + "_" + appendix + "_temp_rootfs.tar.gz";
+            return distro_name + "_" + UserConfig.session_id + "_temp_rootfs.tar.gz";
         }
         static public string EraseDirectory(string path)
         {
@@ -66,5 +67,41 @@ namespace wsld_cs.Linux
 
             return command;
         }
+
+
+        public static void GenerateRootfsTar()
+        {
+            string session_id                = UserConfig.session_id;
+            string win10_temporary_folder    = UserConfig.wsl_windows_temp_path;
+            string win10_imagepath           = UserConfig.wsl_windows_image_path;
+            string linux_temporary_folder    = UserConfig.linux_temporary_folder;
+            string tmp_rootfs_name           = UserConfig.tmp_rootfs_name;
+            string distro_name               = UserConfig.wsld_distro_name;
+
+            string[] commands2 =
+            {
+                   Change_directory(win10_temporary_folder),
+                   Create_directory_tree(linux_temporary_folder),
+                   CopyFile(tmp_rootfs_name, linux_temporary_folder),
+                   Change_directory(linux_temporary_folder),
+                   Untar_rootfs_joined(tmp_rootfs_name, linux_temporary_folder),
+                   EraseFile(tmp_rootfs_name),
+                   Tar_rootfs(distro_name, session_id),
+                   Create_directory_tree(win10_imagepath),
+                   CopyFile(UserConfig.rootfs_name, win10_imagepath),
+                   EraseDirectory(linux_temporary_folder),
+                   Change_directory(win10_temporary_folder),
+                   EraseFile(tmp_rootfs_name)
+
+             };
+
+            var command = GenerateCommand(commands2);
+            Console.WriteLine(command);
+            Console.WriteLine("Generating tar...");
+            Commands.RunProgram(command);
+            Console.WriteLine("Generated.");
+
+        }
+
     }
 }

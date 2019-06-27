@@ -62,7 +62,6 @@ namespace wsld_cs.Dockerio
         }
 
 
-
         public static async Task<byte[]> GetResponseBytes(string uri)
         {
             // Call asynchronous network methods in a try/catch block to handle exceptions
@@ -83,6 +82,38 @@ namespace wsld_cs.Dockerio
                 Environment.Exit(1);
             }
             return responseBody;
+        }
+
+
+        const string docker_pull_api_url = "http://auth.docker.io/token?service=registry.docker.io&scope=repository:";
+        const string docker_register_url = "https://registry-1.docker.io/v2/";
+
+
+        public static void SetupAuth()
+        {
+            var res = GetResponseJson(docker_pull_api_url + UserConfig.repo_image + ":pull").Result;
+            ClientSetBearerAndType(res["access_token"].ToString(), "application/vnd.docker.distribution.manifest.v2+json");
+
+        }
+
+        public static JToken AskForLayers()
+        {
+            SetupAuth();
+            var url = docker_register_url + UserConfig.repo_image + "/manifests/" + UserConfig.tag;
+            return GetResponseJson(url).Result["layers"];
+        }
+
+        public static JObject GetBlobs(string config)
+        {
+            string url = docker_register_url + UserConfig.repo_image + "/blobs/" + config;
+            return GetResponseJson(url).Result;
+        }
+
+        public static byte[] DownloadLayer(string digest)
+        {
+            string url = docker_register_url + UserConfig.repo_image + "/blobs/" + digest;
+            return GetResponseBytes(url).Result;
+
         }
 
 
