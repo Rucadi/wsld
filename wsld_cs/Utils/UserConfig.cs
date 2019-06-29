@@ -11,7 +11,13 @@ namespace wsld_cs
 {
     public static class UserConfig
     {
+
+        public static string default_distro;
         public static string session_id = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
+
+
+
+
 
         public static string repository;
         public static string image;
@@ -38,78 +44,92 @@ namespace wsld_cs
         public static string wsld_distro_name;
         public static int wsld_version;
 
-        public static string windows_temp_path  = Path.GetTempPath();
-        public static string windows_image_path = Path.Combine(windows_temp_path,"images");
-        private static string installation_dir  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"wsld");
+        /*WSLD DEFAULT ONLY PARAMETERS*/
 
-        public static string image_install_dir
-        {
-            get {
-                return Path.Combine(installation_dir,wsld_distro_name);
+            /*WINDOWS PATHS*/
+            public static string windows_temp_path  = Path.GetTempPath();
+            public static string windows_image_path = Path.Combine(windows_temp_path,"images");
+            private static string installation_dir  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"wsld");
+            public static string image_install_dir
+            {
+                get {
+                    return Path.Combine(installation_dir,wsld_distro_name);
+                }
+                set { 
+                    if(value != null && value.Length > 0)
+                        installation_dir = Path.GetFullPath(value);
+                }
             }
-            set { 
-                if(value != null && value.Length > 0)
-                    installation_dir = Path.GetFullPath(value);
-            }
-        }
        
-        public static string wsl_windows_temp_path{
-            get {
-                return Commands.wslpath(windows_temp_path);
+ 
+            /*WINDOWS PATHS LINUX FORMAT*/
+            public static string wsl_windows_temp_path{
+                get {
+                    return Commands.wslpath(windows_temp_path);
+                }
             }
-        }
-        public static string wsl_windows_image_path
-        {
-            get
+            public static string wsl_windows_image_path
             {
-                return Commands.wslpath(windows_image_path);
+                get
+                {
+                    return Commands.wslpath(windows_image_path);
+                }
             }
-        }
-
-        public static string tmp_rootfs_name
-        {
-            get
+            public static string w_rootfs_path
             {
-                return image + "_" + session_id + "_temp_rootfs.tar.gz";
+                get
+                {
+                    return Path.Combine(windows_image_path, rootfs_name);
+                }
             }
-        }
-
-        public static string rootfs_name
-        {
-            get {
-                return wsld_distro_name + "_" + session_id + "_rootfs.tar.gz";
-            }
-        }
-        public static string w_rootfs_path
-        {
-            get
+            public static string w_tmp_rootfs_path
             {
-                return Path.Combine(windows_image_path, rootfs_name);
+                get
+                {
+                    return windows_temp_path + tmp_rootfs_name;
+                }
             }
-        }
 
-        public static string w_tmp_rootfs_path
-        {
-            get {
-                return windows_temp_path + tmp_rootfs_name;
-            }
-        }
 
-        public static string linux_temporary_folder
-        {
-            get
+            /*NAMING*/
+            public static string tmp_rootfs_name
             {
-                return "/tmp/wsld/" + wsld_distro_name + session_id;
+                get
+                {
+                    return image + "_" + session_id + "_temp_rootfs.tar.gz";
+                }
             }
-        }
+
+            public static string rootfs_name
+            {
+                get {
+                    return wsld_distro_name + "_" + session_id + "_rootfs.tar.gz";
+                }
+            }
 
 
-        public static void generateConfigs(string rit, string iid, string d_name, int version)
-        {
-            repo_image_tag = rit;
-            image_install_dir = iid;
-            wsld_distro_name = d_name;
-            wsld_version = version;
-        }
+            /*LINUX PATHS*/
+            public static string linux_temporary_folder
+            {
+                get
+                {
+                    return "/tmp/wsld/" + wsld_distro_name + session_id;
+                }
+            }
+
+            public static void generateConfigs(string rit, string iid, string d_name, int version)
+            {
+                repo_image_tag = rit;
+                image_install_dir = iid;
+                wsld_distro_name = d_name;
+                wsld_version = version;
+            }
+
+        /*END OF DEFAULT ONLY PARAMETERS*/
+
+        /*DOCKER RELATED*/
+
+        public static bool isLoggedToDocker = false;
+
     }
 }

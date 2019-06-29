@@ -25,8 +25,29 @@ namespace wsld.Params
 
     class DockerOptions
     {
-        [Option("login", Required = true, HelpText = "Link wlsd with your docker account!")]
-        public bool login { get; set; }
+
+
+        [Option("upload", Required = false, HelpText = "Link wlsd with your docker account!")]
+        public string upload { get; set; }
+
+    }
+
+    class DockerLoginOptions
+    {
+        [Option('u', "user", Required = false, Default = null, HelpText = "Link wlsd with your docker account!")]
+        public string User { get; set; }
+
+        [Option('p', "password", Required = false, Default = null, HelpText = "Link wlsd with your docker account!")]
+        public string Password { get; set; }
+    }
+
+    class DockerUploadOptions
+    {
+        [Option('d', "distroname", Required = true, HelpText = "Name of the distro to upload")]
+        public string Distroname { get; set; }
+
+        [Option('i', "image", Required = true, HelpText = "Image to upload format: repository/image:tag")]
+        public string Dockerimage { get; set; }
 
     }
 }

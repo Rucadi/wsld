@@ -40,15 +40,7 @@ namespace wsld_cs.Linux
            return "tar cf " + distro_name + "_" + appendix + "_rootfs.tar.gz * || :";
         }
 
-        static public string RootfsName(string distro_name)
-        {
-            return distro_name + "_" + UserConfig.session_id + "_rootfs.tar.gz";
-        }
 
-        static public string TemporalRootfsName(string distro_name)
-        {
-            return distro_name + "_" + UserConfig.session_id + "_temp_rootfs.tar.gz";
-        }
         static public string EraseDirectory(string path)
         {
             return "chmod -R 777 " + path + "&&  rm -rf " + path;
@@ -57,16 +49,16 @@ namespace wsld_cs.Linux
 
         static public string GenerateCommand(string[] commands)
         {
-            var command = "bash -c \"";
-
+            var command = "";
             foreach (var cmd in commands)
             {
-                command += (cmd + " && ");
+                command += (cmd + ";");
             }
-            command += ": \"";
-
             return command;
         }
+
+
+    
 
 
         public static void GenerateRootfsTar()
@@ -98,7 +90,7 @@ namespace wsld_cs.Linux
             var command = GenerateCommand(commands2);
             Console.WriteLine(command);
             Console.WriteLine("Generating tar...");
-            Commands.RunProgram(command);
+            Commands.BashRunCommand(command);
             Console.WriteLine("Generated.");
 
         }

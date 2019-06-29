@@ -32,7 +32,7 @@ namespace wsld_cs
             {
                 var layer = layers.ElementAt(i);
                 Fops.WriteToFileAppend(HttpRequests.DownloadLayer(layer["digest"].ToString()), UserConfig.w_tmp_rootfs_path);
-                Console.WriteLine("Downloaded " + i + 1 + " of " + layers.Count()+ " on: "+ UserConfig.w_tmp_rootfs_path);
+                Console.WriteLine("Downloaded " + (i + 1) + " of " + layers.Count());
             }
 
             Console.WriteLine("Finished! All layers downloaded.");
@@ -60,13 +60,37 @@ namespace wsld_cs
 
         public static bool DockerLogin()
         {
+            return DockerLogin(null, null);
+        }
+
+        public static bool DockerLogin(string user = null, string password = null)
+        {
+            if(user!=null && password!=null)
+            {
+                return Commands.DockerLogin(user, password);
+            }
+
             Console.WriteLine("\nFor using this feature you must login to Docker");
             Console.WriteLine();
-            Console.WriteLine("username: ");
-            string user = Console.ReadLine();
-            Console.WriteLine("password: ");
-            var password = Utils.ReadLineMasked();
-            return Commands.DockerLogin("wsld", user, password);
+            if (user == null)
+            {
+                Console.WriteLine("username: ");
+                user = Console.ReadLine();
+            }else
+            {
+                Console.WriteLine("username: \n"+user+"\n");
+            }
+
+            if (password == null)
+            {
+                Console.WriteLine("password: ");
+                password = Utils.ReadLineMasked();
+            }
+            else
+            {
+                Console.WriteLine("password: ******");
+            }
+            return Commands.DockerLogin(user, password);
         }
 
 
@@ -78,7 +102,6 @@ namespace wsld_cs
             UserConfig.generateConfigs("rucadi/wsld:wsld", "", "wsld", 0);
             DownloadAndGenerateImage();
             Wsl.InstallImage();
-
         }
 
     }

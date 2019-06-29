@@ -7,8 +7,13 @@ using System.Threading.Tasks;
 
 namespace wsld_cs.Processes
 {
-    class Commands
+    static class Commands
     {
+        public static void SetDefaultDistro(string distro)
+        {
+            RunProgram("wsl --set-default " + distro);
+        }
+
         public static void RunProgram(string commandToExecute)
         {
             // Execute wsl command:
@@ -28,13 +33,12 @@ namespace wsld_cs.Processes
                 proc.StandardInput.WriteLine(commandToExecute);
                 proc.StandardInput.Flush();
                 proc.StandardInput.Close();
-                proc.WaitForExit(); // wait up to 5 seconds for command to execute
+                proc.WaitForExit();
             }
         }
 
         public static string RunProgramGetOutput(string commandToExecute)
         {
-            // Execute wsl command:
             using (var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -54,15 +58,13 @@ namespace wsld_cs.Processes
                 proc.WaitForExit(); // wait up to 5 seconds for command to execute
 
                string output = proc.StandardOutput.ReadToEnd();
-                Console.WriteLine(output);
-                return output;
+               return output;
                 
             }
 
         }
 
-
-       public static List<string> getInstalledDistros()
+        public static List<string> getInstalledDistros()
         {
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
@@ -90,27 +92,78 @@ namespace wsld_cs.Processes
             return distro_list;
         }
 
+        public static string RemoveLast(this string text, string character)
+        {
+            if (text.Length < 1) return text;
+            return text.Remove(text.ToString().LastIndexOf(character), character.Length);
+        }
+
+        public static string BashRunCommand(string command)
+        {
+            SetDefaultDistro("wsld");
+
+            Process process = new Process();
+            process.StartInfo.FileName = "bash.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardInput = true;
+            process.StartInfo.RedirectStandardError = true;
+
+            process.Start();
+            process.StandardInput.Write(command);
+            process.StandardInput.Close();
+            process.WaitForExit();
+
+            SetDefaultDistro(UserConfig.default_distro);
+            var result = process.StandardOutput.ReadToEnd();
+            return RemoveLast(result, "\n");
+        }
 
 
-        public static bool DockerLogin(string distro, string username, string password)
+        public static bool DockerLogin(string username, string password)
+        {
+            string command = "service docker start ||  docker login --username " + username + " --password " + password;
+            var res =  BashRunCommand(command);
+            return res.Contains("Login Succeeded");
+        }
+
+        public static bool CheckIfFileExists(string linux_file_path)
+        {
+            string commandString = "if test -f '"+linux_file_path+"'; then echo 'ok'; else echo 'ko'; fi";
+            return BashRunCommand(commandString).Equals("ok"); 
+        }
+
+
+        public static bool IsLoggedToDocker()
+        {
+            return CheckIfFileExists("/root/.docker/config.json");
+        }
+
+        
+
+        public static string GetDefaultDistro()
         {
             Process process = new Process();
-            process.StartInfo.FileName = "wsl.exe";
-            process.StartInfo.Arguments = " -d "+ distro+ " service docker start";
+            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo.Arguments = "/c wsl -l"; // Note the /c command (*)
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
-           // process.StartInfo.RedirectStandardInput = true;
-
-            process.Start();
-            process.WaitForExit();
-            process.StartInfo.Arguments = " -d " + distro + " docker login --username " + username + " --password " + password;
             process.Start();
             process.WaitForExit();
 
-            string rte =  process.StandardOutput.ReadToEnd();
-            return rte.Contains("Login Succeeded");
+            string stdoutput = process.StandardOutput.ReadToEnd();
+            string processed_output = "";
+            foreach (var ch in stdoutput)
+                if (ch != 0) processed_output += ch;
+            var output = processed_output.Split('\n');
+ 
+           return output[1].Split(' ')[0];
         }
+
+
+
 
         public static string wslpath(string WinPath)
         {
