@@ -3,6 +3,30 @@
 This program was created with te intention of doing sharing and installing wsl machines more easily! <br>
 It allows to just grab any dockerhub image and install it as a WSL subsystem or WSL2 Virtual machine.<br>
 
+# New
+
+Now it accepts uploading images to dockerhub too!!<br>
+<br>
+Give it a try: <br>
+
+This next command will upload the installed distro "debian" into my dockerhub repository rucadi.
+<br>
+ ``
+wsld.exe docker upload -d debian  -i  rucadi/debian:latest
+`` 
+<br>
+To login you can use: <br>
+
+ ``
+wsld.exe docker login -u user  -p password
+`` 
+
+<br>
+This accepts no parameters, in that case, you will pass them iteratively.
+
+
+If you try to use a command that requires login, you will be prompted with the login dialog.
+
 # Example
 Go into asciinema to see how it works! <br>
 https://asciinema.org/a/EaGqIVG9IbWJ6iSw70Sl7eQha <br>
