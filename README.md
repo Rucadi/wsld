@@ -27,6 +27,18 @@ This accepts no parameters, in that case, you will pass them iteratively.
 
 If you try to use a command that requires login, you will be prompted with the login dialog.
 
+# Build your own Dockerfiles!
+
+With this feature, you can build you own images for WSL from Dockerfiles.
+<br>
+
+ ``
+wsld.exe docker build -d wsl_distro_name
+`` 
+<br>
+There are more parameters! check the help!
+<br>
+
 # Example
 Go into asciinema to see how it works! <br>
 https://asciinema.org/a/EaGqIVG9IbWJ6iSw70Sl7eQha <br>
