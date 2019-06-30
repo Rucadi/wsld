@@ -16,6 +16,20 @@ namespace wsld_cs
         public static string session_id = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
 
 
+        public static string _dockerfile = "Dockerfile";
+        public static string dockerfile_path
+        {
+            get {
+                return _dockerfile;
+            }
+            set {
+                if (value != null && value.Length > 0)
+                    _dockerfile = value;
+            }
+        }
+
+        public static string PWD = Directory.GetCurrentDirectory();
+        public static string wsl_PWD = Commands.wslpath(PWD);
 
 
 

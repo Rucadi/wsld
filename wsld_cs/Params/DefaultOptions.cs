@@ -50,4 +50,16 @@ namespace wsld.Params
         public string Dockerimage { get; set; }
 
     }
+
+    class DockerfileOptions
+    {
+        [Option('d', "distroname", Required = true, HelpText = "Name of the result distro")]
+        public string Distroname { get; set; }
+
+        [Option('f', "file", Required = false, HelpText = "Dockerfile to build, if using remote, URL.")]
+        public string Dockerfile { get; set; }
+
+        [Option('r', "remote", Required = false,  Default = false, HelpText = "Add this if the f is a URL")]
+        public bool remote { get; set; }
+    }
 }

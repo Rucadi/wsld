@@ -37,13 +37,14 @@ namespace wsld_cs.Processes
             }
         }
 
-        public static string RunProgramGetOutput(string commandToExecute)
+        public static string RunCmdCommand(string commandToExecute)
         {
             using (var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = @"cmd.exe",
+                    Arguments = "/c " + commandToExecute,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardInput = true,
@@ -52,13 +53,10 @@ namespace wsld_cs.Processes
             })
             {
                 proc.Start();
-                proc.StandardInput.WriteLine(commandToExecute);
-                proc.StandardInput.Flush();
-                proc.StandardInput.Close();
                 proc.WaitForExit(); // wait up to 5 seconds for command to execute
 
-               string output = proc.StandardOutput.ReadToEnd();
-               return output;
+                return proc.StandardOutput.ReadToEnd();
+              
                 
             }
 
@@ -66,16 +64,7 @@ namespace wsld_cs.Processes
 
         public static List<string> getInstalledDistros()
         {
-            Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/c wsl -l"; // Note the /c command (*)
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.Start();
-            process.WaitForExit();
-
-            string stdoutput = process.StandardOutput.ReadToEnd();
+            string stdoutput = RunCmdCommand("wsl -l");
             string processed_output = "";
             foreach (var ch in stdoutput)
                 if (ch != 0) processed_output += ch;
@@ -94,14 +83,14 @@ namespace wsld_cs.Processes
 
         public static string RemoveLast(this string text, string character)
         {
+            if (text == null) return null;
             if (text.Length < 1) return text;
             return text.Remove(text.ToString().LastIndexOf(character), character.Length);
         }
 
-        public static string BashRunCommand(string command)
+        public static string BashRunCommand_stdout(string command)
         {
             SetDefaultDistro("wsld");
-
             Process process = new Process();
             process.StartInfo.FileName = "bash.exe";
             process.StartInfo.Arguments = "";
@@ -117,24 +106,46 @@ namespace wsld_cs.Processes
 
             SetDefaultDistro(UserConfig.default_distro);
             var result = process.StandardOutput.ReadToEnd();
-            result += process.StandardError.ReadToEnd();
             return RemoveLast(result, "\n");
         }
+
+        public static string BashRunCommand_stderr(string command)
+        {
+            SetDefaultDistro("wsld");
+            Process process = new Process();
+            process.StartInfo.FileName = "bash.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardInput = true;
+            process.StartInfo.RedirectStandardError = true;
+
+            process.Start();
+            process.StandardInput.Write(command);
+            process.StandardInput.Close();
+            process.WaitForExit();
+
+            SetDefaultDistro(UserConfig.default_distro);
+            var result = process.StandardError.ReadToEnd();
+            return RemoveLast(result, "\n");
+        }
+
+
 
 
         public static bool DockerLogin(string username, string password)
         {
             string command = "service docker start ||  docker login --username " + username + " --password " + password;
-            var res =  BashRunCommand(command);
+            var res =  BashRunCommand_stdout(command);
             return res.Contains("Login Succeeded");
         }
 
         public static bool CheckIfFileExists(string linux_file_path)
         {
-            string commandString = "if test -f '"+linux_file_path+"'; then echo 'ok'; else echo 'ko'; fi";
-            return BashRunCommand(commandString).Equals("ok"); 
+            string commandString = "if test -f '" + linux_file_path + "'; then echo 'ok'; else echo 'ko'; fi";
+            var a = BashRunCommand_stdout(commandString);
+            return (a).Equals("ok");
         }
-
 
         public static bool IsLoggedToDocker()
         {
@@ -145,22 +156,13 @@ namespace wsld_cs.Processes
 
         public static string GetDefaultDistro()
         {
-            Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/c wsl -l"; // Note the /c command (*)
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.Start();
-            process.WaitForExit();
-
-            string stdoutput = process.StandardOutput.ReadToEnd();
+      
+            string stdoutput = RunCmdCommand("wsl -l");
             string processed_output = "";
             foreach (var ch in stdoutput)
                 if (ch != 0) processed_output += ch;
             var output = processed_output.Split('\n');
- 
-           return output[1].Split(' ')[0];
+            return output[1].Split(' ')[0];
         }
 
 

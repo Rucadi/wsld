@@ -22,7 +22,7 @@ namespace wsld.Dockerio
                  "wsl.exe --export "+UserConfig.wsld_distro_name+" import_docker.tar.gz"
             };
 
-            Commands.BashRunCommand(Linux_Commands.GenerateCommand(command_1));
+            Commands.BashRunCommand_stdout(Linux_Commands.GenerateCommand(command_1));
 
             if (!Commands.CheckIfFileExists(wsl_tmp + "/import_docker.tar.gz")) return "ERROR: The image could not be exported from WSL";
 
@@ -36,11 +36,11 @@ namespace wsld.Dockerio
                  "echo "+marker,
                  "docker push " + UserConfig.repo_image_tag,
                  "echo "+marker,
-                 "docker rmi $(docker images -q)",
+                 "docker rmi -f $(docker images -q)",
                  Linux_Commands.EraseDirectory(wsl_tmp)
             };
 
-            var ret = Commands.BashRunCommand(Linux_Commands.GenerateCommand(command_2));
+            var ret = Commands.BashRunCommand_stdout(Linux_Commands.GenerateCommand(command_2));
 
 
             int pFrom = ret.IndexOf(marker) + marker.Length;
@@ -74,11 +74,11 @@ namespace wsld.Dockerio
             };
 
             var command = Linux_Commands.GenerateCommand(commands);
-            var res = Commands.BashRunCommand(command);
+            var res = Commands.BashRunCommand_stdout(command);
             if (res.Contains("docker login"))
             {
                 Console.WriteLine("repository does not exist or may require 'wsld docker login'");
-                Commands.BashRunCommand(Linux_Commands.EraseDirectory(linux_temporary_folder));
+                Commands.BashRunCommand_stdout(Linux_Commands.EraseDirectory(linux_temporary_folder));
                 System.Environment.Exit(0);
             }
 
@@ -91,11 +91,13 @@ namespace wsld.Dockerio
                  Linux_Commands.Change_directory(temp_linux_path_extracted),
                  Linux_Commands.Tar_rootfs(UserConfig.wsld_distro_name, UserConfig.session_id),
                  Linux_Commands.MoveFile(UserConfig.rootfs_name,win10_imagepath),
-                 Linux_Commands.EraseDirectory(linux_temporary_folder)
+                 Linux_Commands.EraseDirectory(linux_temporary_folder),
+                 "docker rmi -f $(docker images -q)",
+
             };
             var command2 = Linux_Commands.GenerateCommand(commands2);
             Console.WriteLine("Generating tar from docker...");
-            Commands.BashRunCommand(command2);
+            Commands.BashRunCommand_stdout(command2);
 
             Console.WriteLine("Generated.");
 
@@ -103,5 +105,35 @@ namespace wsld.Dockerio
 
         }
 
+
+        public static bool BuildDockerFile_remote()
+        {
+
+            string[] commands =
+            {
+                 Linux_Commands.StartDockerService(),
+                 "docker build "+UserConfig.dockerfile_path+" -t "+UserConfig.repo_image_tag
+            };
+
+            var com = Linux_Commands.GenerateCommand(commands);
+            var stderr = Commands.BashRunCommand_stderr(com);
+            if (stderr == null || stderr.Length == 0) return false;
+            return true;
+        }
+
+        public static bool BuildDockerfile()
+        {
+            
+            string[] commands =
+            {
+                 Linux_Commands.StartDockerService(),
+                 "docker build . -f "+UserConfig.dockerfile_path+" -t "+UserConfig.repo_image_tag
+            };
+
+            var com = Linux_Commands.GenerateCommand(commands);
+            var stderr = Commands.BashRunCommand_stderr(com);
+            if (stderr == null || stderr.Length == 0) return false;
+            return true;
+        }
     }
 }

@@ -116,7 +116,7 @@ namespace wsld_cs.Linux
 
             var command = GenerateCommand(commands2);
             Console.WriteLine("Generating tar...");
-            Commands.BashRunCommand(command);
+            Commands.BashRunCommand_stdout(command);
             Console.WriteLine("Generated.");
 
         }

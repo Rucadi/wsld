@@ -47,45 +47,100 @@ namespace wsld_cs
 
 
 
-        static void DockerTree(string[] args)
+        static bool DockerUpload(string[] args)
         {
             string firstArg = args.Length > 0 ? args[0] : "";
 
-            if(firstArg.Equals("login"))
+            Parser.Default.ParseArguments<DockerUploadOptions>(args).WithParsed(options => {
+                UserConfig.generateConfigs(options.Dockerimage, "", options.Distroname, 0);
+
+                Console.WriteLine(DockerInterop.wslToDockerHub());
+            });
+
+            return true;
+
+        }
+
+
+        static bool DockerBuild(string[] args)
+        {
+            string firstArg = args.Length > 0 ? args[0] : "";
+
+            Parser.Default.ParseArguments<DockerfileOptions>(args).WithParsed(options => {
+                UserConfig.generateConfigs("wsld/wsld_dockerfile:image", "", options.Distroname, 0);
+                UserConfig.dockerfile_path = options.Dockerfile;
+
+                Console.WriteLine("Building image...");
+
+                bool result = false;
+
+                if (options.remote)
+                    result = DockerInterop.BuildDockerFile_remote();
+                else result = DockerInterop.BuildDockerfile();
+
+                if(result)
+                        Console.WriteLine("Image created correctly... installing...");
+
+                
+                else
+                {
+                    Console.WriteLine("Image generation failed...");
+                }
+                DockerInterop.DownloadImageUsingDocker();
+                Wsl.InstallImage();
+            });
+
+            return true;
+
+        }
+
+        static bool DockerLogin(string[] args)
+        {
+            string firstArg = args.Length > 0 ? args[0] : "";
+
+            bool retval = false;
+            Parser.Default.ParseArguments<DockerLoginOptions>(args).WithParsed(options => {
+                if (Docker.DockerLogin(options.User, options.Password))
+                {
+                    Console.WriteLine("Succeed!");
+                    retval = true;
+                }
+                else {
+                    Console.WriteLine("User or Password incorrect");
+                }
+            });
+            return retval;
+        }
+
+        static bool DockerLogin_required()
+        {
+            if (Docker.DockerLogin(null, null))
             {
-                Parser.Default.ParseArguments<DockerLoginOptions>(args).WithParsed(options => {
-                    if (Docker.DockerLogin(options.User, options.Password))
-                        Console.WriteLine("Succeed!");
-                    else Console.WriteLine("User or Password incorrect");
-                });
-
-                return;
-            }
-            else if (!UserConfig.isLoggedToDocker)
-            {
-                if(Docker.DockerLogin(null, null))
-                    Console.WriteLine("Login Succeed!, rerun the command!");
-                else Console.WriteLine("User or Password incorrect");
-                return;
+                Console.WriteLine("Login Succeed!, rerun the command!");
+                return true;
             }
 
+            Console.WriteLine("User or Password incorrect");
+            return false;
+        }
 
-            if (firstArg.Equals("upload"))
-            {
-                Parser.Default.ParseArguments<DockerUploadOptions>(args).WithParsed(options => {
-                    UserConfig.generateConfigs(options.Dockerimage, "", options.Distroname, 0);
+        static bool DockerTree(string[] args)
+        {
+            string firstArg = args.Length > 0 ? args[0] : "";
 
-                    Console.WriteLine(DockerInterop.wslToDockerHub());
-                });
 
-                return;
-            }
+
+            if (firstArg.Equals("login")) return DockerLogin(args);
+            if (!UserConfig.isLoggedToDocker) return DockerLogin_required();
+            if (firstArg.Equals("upload")) return DockerUpload(args);
+            if (firstArg.Equals("build")) return DockerBuild(args);
 
             Console.WriteLine("Command must be used followed by login or upload");
             Console.WriteLine("Example:");
             Console.WriteLine("wsld docker login");
             Console.WriteLine("wsld docker upload");
 
+            return false;
 
         }
 
@@ -115,7 +170,7 @@ namespace wsld_cs
 
                 default:
                         var cmdOptions = Parser.Default.ParseArguments<DefaultOptions>(args);
-                        cmdOptions.WithParsed(options => { ParsedMain(options); });
+                        cmdOptions.WithParsed(options => { DefaultOptionsMain(options); });
                     break;
             }
            
@@ -124,7 +179,8 @@ namespace wsld_cs
   
         }
 
-        private static void ParsedMain(DefaultOptions options)
+
+        private static void DefaultOptionsMain(DefaultOptions options)
         {
             UserConfig.generateConfigs(options.Dockerimage, options.InstallDir, options.Distroname, options.Version);
             DockerInterop.DownloadImageUsingDocker();
