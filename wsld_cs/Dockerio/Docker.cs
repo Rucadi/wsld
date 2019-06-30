@@ -15,6 +15,7 @@ using wsld_cs.Files;
 using wsld_cs.Linux;
 using wsld_cs.wsl;
 using wsld.Utils;
+using wsld.Dockerio;
 
 namespace wsld_cs
 {
@@ -41,20 +42,7 @@ namespace wsld_cs
 
 
 
-        public static void DownloadAndGenerateImage()
-        {
-            string distro_name  = UserConfig.wsld_distro_name;
-            int count = DownloadImage();
-            if(count > 1)
-            {
-                Linux_Commands.GenerateRootfsTar();
-                File.Delete(UserConfig.w_tmp_rootfs_path);
-            }
-            else
-            {
-                File.Move(UserConfig.w_tmp_rootfs_path, UserConfig.w_rootfs_path);
-            }
-        }
+
 
 
 
@@ -94,13 +82,16 @@ namespace wsld_cs
         }
 
 
+
+
         public static void InstallWsldImage()
         {
             Console.WriteLine("WSLD Image will be installed.");
             Console.WriteLine("This image is needed to perform all the operations of this tool");
-            Console.WriteLine("Touching the contents of the image is not recomended.");
+            Console.WriteLine("Touching the contents of the image is not recommended.");
             UserConfig.generateConfigs("rucadi/wsld:wsld", "", "wsld", 0);
-            DownloadAndGenerateImage();
+            DownloadImage();
+            File.Move(UserConfig.w_tmp_rootfs_path, UserConfig.w_rootfs_path);
             Wsl.InstallImage();
         }
 

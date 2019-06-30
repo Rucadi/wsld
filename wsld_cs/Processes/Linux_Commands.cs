@@ -10,6 +10,30 @@ namespace wsld_cs.Linux
     class Linux_Commands
     {
 
+        static public string StartDockerService()
+        {
+            return "service docker start";
+        }
+
+        static public string DockerPull(string rit)
+        {
+            return "docker pull " + rit;
+        }
+
+        static public string DockerSave(string rit, string path)
+        {
+            return "docker save " + rit + " -o " + path;
+        }
+
+        static public string UnTar(string path)
+        {
+            return "tar xf "+path;
+        }
+
+        static public string UnTarAllFilesThatMatchesIntoFolder(string pattern, string searchPath, string outPath)
+        {
+            return "find " + searchPath + " -type f -name  \"" + pattern + "\" -exec tar xf {} -C " + outPath + " \\; ";
+        }
 
         static public string Change_directory(string path)
         {
@@ -29,7 +53,10 @@ namespace wsld_cs.Linux
         {
             return "cp " + from + " " + to;
         }
-
+        static public string MoveFile(string from, string to)
+        {
+            return "mv " + from + " " + to;
+        }
         static public string Untar_rootfs_joined(string name, string untar_path)
         {
             return "tar xfi " + name + " -C " + untar_path + "/ --exclude=/mnt --exclude=/dev --exclude=/proc --exclude=/tmp || :";
@@ -88,7 +115,6 @@ namespace wsld_cs.Linux
              };
 
             var command = GenerateCommand(commands2);
-            Console.WriteLine(command);
             Console.WriteLine("Generating tar...");
             Commands.BashRunCommand(command);
             Console.WriteLine("Generated.");

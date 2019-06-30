@@ -37,8 +37,8 @@ namespace wsld.Dockerio
                  "docker push " + UserConfig.repo_image_tag,
                  "echo "+marker,
                  "docker rmi $(docker images -q)",
-                 "rm -rf "+wsl_tmp
-                };
+                 Linux_Commands.EraseDirectory(wsl_tmp)
+            };
 
             var ret = Commands.BashRunCommand(Linux_Commands.GenerateCommand(command_2));
 
@@ -56,6 +56,52 @@ namespace wsld.Dockerio
 
         }
 
+
+        public static bool DownloadImageUsingDocker()
+        {
+            string linux_temporary_folder = UserConfig.linux_temporary_folder;
+            string temp_linux_path_extracted = linux_temporary_folder+"/image";
+            string win10_imagepath = UserConfig.wsl_windows_image_path;
+
+            string[] commands =
+            {
+                 Linux_Commands.Create_directory_tree(win10_imagepath),
+                 Linux_Commands.Create_directory_tree(linux_temporary_folder),
+                 Linux_Commands.Create_directory_tree(temp_linux_path_extracted),
+                 Linux_Commands.Change_directory(linux_temporary_folder),
+                 Linux_Commands.StartDockerService(),
+                 Linux_Commands.DockerPull(UserConfig.repo_image_tag)
+            };
+
+            var command = Linux_Commands.GenerateCommand(commands);
+            var res = Commands.BashRunCommand(command);
+            if (res.Contains("docker login"))
+            {
+                Console.WriteLine("repository does not exist or may require 'wsld docker login'");
+                Commands.BashRunCommand(Linux_Commands.EraseDirectory(linux_temporary_folder));
+                System.Environment.Exit(0);
+            }
+
+            string[] commands2 =
+            {
+                 Linux_Commands.Change_directory(linux_temporary_folder),
+                 Linux_Commands.DockerSave(UserConfig.repo_image,"docker"),
+                 Linux_Commands.UnTar("docker"),
+                 Linux_Commands.UnTarAllFilesThatMatchesIntoFolder("*.tar",linux_temporary_folder,temp_linux_path_extracted),
+                 Linux_Commands.Change_directory(temp_linux_path_extracted),
+                 Linux_Commands.Tar_rootfs(UserConfig.wsld_distro_name, UserConfig.session_id),
+                 Linux_Commands.MoveFile(UserConfig.rootfs_name,win10_imagepath),
+                 Linux_Commands.EraseDirectory(linux_temporary_folder)
+            };
+            var command2 = Linux_Commands.GenerateCommand(commands2);
+            Console.WriteLine("Generating tar from docker...");
+            Commands.BashRunCommand(command2);
+
+            Console.WriteLine("Generated.");
+
+            return true;
+
+        }
 
     }
 }

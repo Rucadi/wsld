@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace wsld_cs.wsl
             else
                 Commands.RunProgram("wsl --import " + UserConfig.wsld_distro_name + " " + UserConfig.image_install_dir + " " + UserConfig.w_rootfs_path);
 
+            File.Delete(UserConfig.w_rootfs_path);
             Console.WriteLine("Done!");
         }
 

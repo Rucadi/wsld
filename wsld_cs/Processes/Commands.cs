@@ -117,6 +117,7 @@ namespace wsld_cs.Processes
 
             SetDefaultDistro(UserConfig.default_distro);
             var result = process.StandardOutput.ReadToEnd();
+            result += process.StandardError.ReadToEnd();
             return RemoveLast(result, "\n");
         }
 

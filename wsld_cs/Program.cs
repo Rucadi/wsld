@@ -63,7 +63,9 @@ namespace wsld_cs
             }
             else if (!UserConfig.isLoggedToDocker)
             {
-                Docker.DockerLogin(null, null);
+                if(Docker.DockerLogin(null, null))
+                    Console.WriteLine("Login Succeed!, rerun the command!");
+                else Console.WriteLine("User or Password incorrect");
                 return;
             }
 
@@ -125,7 +127,7 @@ namespace wsld_cs
         private static void ParsedMain(DefaultOptions options)
         {
             UserConfig.generateConfigs(options.Dockerimage, options.InstallDir, options.Distroname, options.Version);
-            Docker.DownloadAndGenerateImage();
+            DockerInterop.DownloadImageUsingDocker();
             Wsl.InstallImage();
         }
 
