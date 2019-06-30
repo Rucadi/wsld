@@ -72,16 +72,9 @@ namespace wsld_cs
 
                 Console.WriteLine("Building image...");
 
-                bool result = false;
 
-                if (options.remote)
-                    result = DockerInterop.BuildDockerFile_remote();
-                else result = DockerInterop.BuildDockerfile();
-
-                if(result)
+                if (DockerInterop.BuildDockerfile(options.remote))
                         Console.WriteLine("Image created correctly... installing...");
-
-                
                 else
                 {
                     Console.WriteLine("Image generation failed...");

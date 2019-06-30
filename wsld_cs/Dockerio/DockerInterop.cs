@@ -47,7 +47,7 @@ namespace wsld.Dockerio
             int pTo = ret.LastIndexOf(marker);
             string result = ret.Substring(pFrom, pTo - pFrom);
 
-            if (result.Contains("Pushed") || result.Contains("Mounted")  || result.Contains("exists"))
+            if (result.Contains("Pushed") || result.Contains("Mounted") || result.Contains("exists"))
                 return "Success.";
 
 
@@ -60,7 +60,7 @@ namespace wsld.Dockerio
         public static bool DownloadImageUsingDocker()
         {
             string linux_temporary_folder = UserConfig.linux_temporary_folder;
-            string temp_linux_path_extracted = linux_temporary_folder+"/image";
+            string temp_linux_path_extracted = linux_temporary_folder + "/image";
             string win10_imagepath = UserConfig.wsl_windows_image_path;
 
             string[] commands =
@@ -106,29 +106,39 @@ namespace wsld.Dockerio
         }
 
 
-        public static bool BuildDockerFile_remote()
-        {
 
-            string[] commands =
+        public static bool BuildDockerfile(bool remote = false)
+        {
+            string linux_temporary_folder = UserConfig.linux_temporary_folder + "/";
+
+            string from = remote ? UserConfig.dockerfile_path : ". -f " + UserConfig.dockerfile_path;
+
+
+            string docker_build_command = "docker build " + from + " -t " + UserConfig.repo_image_tag;
+
+
+            string[] commands;
+
+            string[] remoteCommands =
             {
+                 Linux_Commands.Create_directory_tree(linux_temporary_folder),
+                 Linux_Commands.Change_directory(linux_temporary_folder),
                  Linux_Commands.StartDockerService(),
-                 "docker build "+UserConfig.dockerfile_path+" -t "+UserConfig.repo_image_tag
+                 docker_build_command,
+                 Linux_Commands.EraseDirectory(linux_temporary_folder)
             };
 
-            var com = Linux_Commands.GenerateCommand(commands);
-            var stderr = Commands.BashRunCommand_stderr(com);
-            if (stderr == null || stderr.Length == 0) return false;
-            return true;
-        }
-
-        public static bool BuildDockerfile()
-        {
-            
-            string[] commands =
+            string[] localCommands =
             {
+                 Linux_Commands.Create_directory_tree(linux_temporary_folder),
+                 Linux_Commands.Change_directory(linux_temporary_folder),
                  Linux_Commands.StartDockerService(),
-                 "docker build . -f "+UserConfig.dockerfile_path+" -t "+UserConfig.repo_image_tag
+                 Linux_Commands.CopyDir(UserConfig.wsl_PWD+"/*", linux_temporary_folder),
+                 docker_build_command,
+                 Linux_Commands.EraseDirectory(linux_temporary_folder)
             };
+
+            commands = remote ? remoteCommands : localCommands;
 
             var com = Linux_Commands.GenerateCommand(commands);
             var stderr = Commands.BashRunCommand_stderr(com);

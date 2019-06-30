@@ -53,6 +53,11 @@ namespace wsld_cs.Linux
         {
             return "cp " + from + " " + to;
         }
+
+        static public string CopyDir(string from, string to)
+        {
+            return "cp -r "+from+" "+to;
+        }
         static public string MoveFile(string from, string to)
         {
             return "mv " + from + " " + to;
