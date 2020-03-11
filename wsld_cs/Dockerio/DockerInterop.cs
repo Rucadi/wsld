@@ -11,6 +11,9 @@ namespace wsld.Dockerio
 {
     class DockerInterop
     {
+
+  
+
         public static string wslToDockerHub()
         {
 
@@ -89,6 +92,7 @@ namespace wsld.Dockerio
                  Linux_Commands.UnTar("docker"),
                  Linux_Commands.UnTarAllFilesThatMatchesIntoFolder("*.tar",linux_temporary_folder,temp_linux_path_extracted),
                  Linux_Commands.Change_directory(temp_linux_path_extracted),
+                 Linux_Commands.CreateUser(),
                  Linux_Commands.Tar_rootfs(UserConfig.wsld_distro_name, UserConfig.session_id),
                  Linux_Commands.MoveFile(UserConfig.rootfs_name,win10_imagepath),
                  Linux_Commands.EraseDirectory(linux_temporary_folder),

@@ -32,7 +32,7 @@ namespace wsld_cs
             for (int i = 0; i < layers.Count(); ++i)
             {
                 var layer = layers.ElementAt(i);
-                Fops.WriteToFileAppend(HttpRequests.DownloadLayer(layer["digest"].ToString()), UserConfig.w_tmp_rootfs_path);
+                Fops.WriteToFileAppend(HttpRequests.DownloadLayer(layer["digest"].ToString()), UserConfig.w_rootfs_path);
                 Console.WriteLine("Downloaded " + (i + 1) + " of " + layers.Count());
             }
 
@@ -90,8 +90,11 @@ namespace wsld_cs
             Console.WriteLine("This image is needed to perform all the operations of this tool");
             Console.WriteLine("Touching the contents of the image is not recommended.");
             UserConfig.generateConfigs("rucadi/wsld:wsld", "", "wsld", 0);
+            System.IO.Directory.CreateDirectory(UserConfig.windows_image_path);
             DownloadImage();
-            File.Move(UserConfig.w_tmp_rootfs_path, UserConfig.w_rootfs_path);
+            
+            Console.WriteLine(UserConfig.w_tmp_rootfs_path);
+            Console.WriteLine(UserConfig.w_rootfs_path);
             Wsl.InstallImage();
         }
 

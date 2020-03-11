@@ -175,9 +175,22 @@ namespace wsld_cs
 
         private static void DefaultOptionsMain(DefaultOptions options)
         {
+            UserConfig.setImageUserPasswordConfig(options.User, options.Password, options.CreateUser);
             UserConfig.generateConfigs(options.Dockerimage, options.InstallDir, options.Distroname, options.Version);
             DockerInterop.DownloadImageUsingDocker();
             Wsl.InstallImage();
+
+
+            if(UserConfig.createUser)
+            {
+                Console.WriteLine("If needed, install sudo with the root user loading the distro with: ");
+                var bgc = Console.BackgroundColor;
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                Console.WriteLine("wsl -d " + options.Distroname + " -u root");
+                Console.BackgroundColor = bgc;
+            }
+           
+            
         }
 
     }

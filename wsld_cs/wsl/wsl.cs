@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using wsld_cs.Processes;
+using wsld_cs.Linux;
 
 namespace wsld_cs.wsl
 {
@@ -24,8 +25,12 @@ namespace wsld_cs.wsl
             else
                 Commands.RunProgram("wsl --import " + UserConfig.wsld_distro_name + " " + UserConfig.image_install_dir + " " + UserConfig.w_rootfs_path);
 
-            File.Delete(UserConfig.w_rootfs_path);
+             File.Delete(UserConfig.w_rootfs_path);
+            var bgc = Console.BackgroundColor;
+
+            Console.BackgroundColor = ConsoleColor.Green;
             Console.WriteLine("Done!");
+            Console.BackgroundColor = bgc;
         }
 
 
@@ -38,5 +43,7 @@ namespace wsld_cs.wsl
              }
             return false;
         }
+
+
     }
 }

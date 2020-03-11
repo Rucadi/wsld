@@ -64,12 +64,12 @@ namespace wsld_cs.Linux
         }
         static public string Untar_rootfs_joined(string name, string untar_path)
         {
-            return "tar xfi " + name + " -C " + untar_path + "/ --exclude=/mnt --exclude=/dev --exclude=/proc --exclude=/tmp || :";
+            return "tar xfi " + name + " -C " + untar_path + "/   --same-owner --hard-dereference || :";
         }
 
         static public string Tar_rootfs(string distro_name, string appendix)
         {
-           return "tar cf " + distro_name + "_" + appendix + "_rootfs.tar.gz * || :";
+           return "tar cf " + distro_name + "_" + appendix + "_rootfs.tar.gz * --same-owner --hard-dereference || :";
         }
 
 
@@ -78,6 +78,16 @@ namespace wsld_cs.Linux
             return "chmod -R 777 " + path + "&&  rm -rf " + path;
         }
 
+        static public string CreateUser()
+        {
+            if (UserConfig.createUser)
+            { 
+                string add_user_to_shadow = "echo  " + UserConfig.username + ":`python3 - c 'import crypt; print(crypt.crypt(\"" + UserConfig.userpassword + "\"))'`:18073:0:99999:7::: >> ./etc/shadow";
+                string passwd = "echo " + UserConfig.username + ":x:1234:1234:,,,:/home/" + UserConfig.username + ":/bin/bash >> ./etc/passwd";
+                return add_user_to_shadow + " && " + "mkdir -p ./home/" + UserConfig.username + " && " + passwd + " && " + "echo -e \" [user]\\ndefault=" + UserConfig.username + "\\n \" >> ./etc/wsl.conf";
+            }
+            return "ls";
+        }
 
         static public string GenerateCommand(string[] commands)
         {

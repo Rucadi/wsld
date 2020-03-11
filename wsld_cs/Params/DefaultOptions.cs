@@ -20,6 +20,15 @@ namespace wsld.Params
 
         [Option('v', "version", Required = false, HelpText = "Version for the new distro, the default is the wsl default, set 1 to WSL1, 2 to WSL2.")]
         public int Version { get; set; }
+
+        [Option('g', "createuser", Required = false, Default = false, HelpText = "If set, creates a default user. If the docker image doesn't have a root user, do not use.")]
+        public bool CreateUser { get; set; }
+
+        [Option('u', "user", Required = false, Default = "user", HelpText = "Create a user name, default: user")]
+        public string User { get; set; }
+
+        [Option('p', "password", Required = false, Default="user", HelpText = "Create a default password for the user, default: user")]
+        public string Password { get; set; }
         
     }
 

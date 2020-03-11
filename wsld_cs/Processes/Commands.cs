@@ -109,6 +109,27 @@ namespace wsld_cs.Processes
             return RemoveLast(result, "\n");
         }
 
+        public static string run_command_on_distro(string command, string distro)
+        {
+            SetDefaultDistro(distro);
+            Process process = new Process();
+            process.StartInfo.FileName = "bash.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardInput = true;
+            process.StartInfo.RedirectStandardError = true;
+
+            process.Start();
+            process.StandardInput.Write(command);
+            process.StandardInput.Close();
+            process.WaitForExit();
+
+            SetDefaultDistro(UserConfig.default_distro);
+            var result = process.StandardOutput.ReadToEnd();
+            return RemoveLast(result, "\n");
+        }
+
         public static string BashRunCommand_stderr(string command)
         {
             SetDefaultDistro("wsld");

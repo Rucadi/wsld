@@ -131,8 +131,21 @@ namespace wsld_cs
                 }
             }
 
+        /*USER AND PASSWORD*/
+
+            public static string username;
+            public static string userpassword;
+        public static bool createUser;
+            public static void setImageUserPasswordConfig(string user, string passw, bool create)
+        {
+
+            createUser = create;
+            username = user;
+            userpassword = passw;
+        }
             public static void generateConfigs(string rit, string iid, string d_name, int version)
             {
+
                 repo_image_tag = rit;
                 image_install_dir = iid;
                 wsld_distro_name = d_name;
