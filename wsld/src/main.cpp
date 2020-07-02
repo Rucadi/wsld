@@ -41,7 +41,7 @@ void installDockerImageAsWsld()
         exit(1);
     }
 
-    auto cmd = downloadDockerImage(getTempDirPath().string(), "/tmp/wsld", tarname, dockerImage(imagename));
+    auto cmd = downloadDockerImage(getTempDirPath().string(), std::string("/tmp/wsld/") + std::to_string(session), tarname, dockerImage(imagename));
     Wsl::Launch("wsld", cmd);
 
     auto tarpath = getTempDirPath() /= tarname;
@@ -50,9 +50,9 @@ void installDockerImageAsWsld()
 }
 
 
-void unistallWslImage(const std::string& name)
+void unistallWslImage()
 {
-    std::string command = "wsl --unregister " + name;
+    std::string command = "wsl --unregister " + getParsedOptions()["r"].as<std::string>();
     std::cout << command << std::endl;
     system(command.c_str());
 }
@@ -64,6 +64,27 @@ static void dockerLogin(const std::string& username, const std::string& password
 }
 
 
+static void uploadWslToDockerhub()
+{
+    unsigned int  session = rand();
+
+    std::string distro_name = getParsedOptions()["distro"].as<std::string>();
+    std::string tarname = distro_name + std::to_string(session) + ".tar.gz";
+    std::string imagename = getParsedOptions()["image"].as<std::string>();
+
+
+    if (!Wsl::IsDistributionRegistered(distro_name))
+    {
+        std::cerr << "A distro named: " << distro_name << " doesn't exists" << std::endl;
+        exit(1);
+    }
+
+    std::cout << "wsl to docker" << std::endl;
+    auto cmd = wsl_to_docker(std::string("/tmp/wsld/") + std::to_string(session), distro_name, dockerImage(imagename));
+    std::wcout << cmd.getCommandSequence() << std::endl;
+    Wsl::Launch("wsld", cmd);
+    std::cout << "launched" << std::endl;
+}
 
 void installWsldImage()
 {
@@ -72,6 +93,7 @@ void installWsldImage()
     URLDownloadToFile(NULL, L"https://gitlab.com/ruben.cano96/wsld_image/-/raw/master/wsld.tar", tarpath.wstring().c_str(), 0, NULL);
     importDistro("wsld", tarpath, installpath);
 }
+
 int main(int argc, char** argv)
 {
     getParsedOptions(argc, argv);
@@ -84,20 +106,28 @@ int main(int argc, char** argv)
         installWsldImage();
     }
 
-    if (getParsedOptions()["l"].count())
+    auto isPresent = [&](std::string  str) {return getParsedOptions()[str].count(); };
+    auto getStringOp = [&](std::string str) {return getParsedOptions()[str].as<std::string>(); };
+    auto printHelp = [&]() {std::cout << options.help() << std::endl;; };
+    if (isPresent("t"))
     {
-        if (getParsedOptions()["u"].count() && getParsedOptions()["p"].count())
-        {
-            dockerLogin(getParsedOptions()["u"].as<std::string>(), getParsedOptions()["p"].as<std::string>());
-        }
+        if (isPresent("d") && isPresent("i"))
+            uploadWslToDockerhub();
+        else printHelp();
     }
-    if (getParsedOptions()["r"].count())
+    else if (isPresent("l"))
     {
-        unistallWslImage(getParsedOptions()["r"].as<std::string>());
+        if (isPresent("u") && isPresent("p"))
+            dockerLogin(getStringOp("u"), getStringOp("p"));
+        else printHelp();
     }
-    else if (getParsedOptions()["distro"].count() && getParsedOptions()["image"].count())
+    else if (isPresent("r"))
+    {
+        unistallWslImage();
+    }
+    else if (isPresent("d") && isPresent("i"))
     {
         installDockerImageAsWsld();
     }
-    else std::cout << options.help() << std::endl;;
+    else printHelp();
 }

@@ -2,70 +2,62 @@
 #include <string>
 #include "composedCommand.h"
 #include "dockerUtils.h"
-static  std::string StartDockerService()
+static  std::string start_docker_service()
 {
     return "service docker start";
 }
 
-static  std::string DockerPull(const std::string& rit)
-{
-    return "docker pull " + rit;
-}
 
-static  std::string DockerSave(const std::string& rit, const std::string& path)
-{
-    return "docker save " + rit + " -o " + path;
-}
 
-static  std::string UnTar(const std::string& path)
+static  std::string un_tar(const std::string& path)
 {
     return "tar xf " + path;
 }
 
-static  std::string UnTarAllFilesThatMatchesIntoFolder(const std::string& pattern, const std::string& searchPath, const std::string& outPath)
+static  std::string un_tar_all_files_that_matches_into_folder(const std::string& pattern, const std::string& searchPath, const std::string& outPath)
 {
     return "find " + searchPath + " -type f -name  \"" + pattern + "\" -exec tar xf {} -C " + outPath + " \\; ";
 }
 
-static  std::string Change_directory(const std::string& path)
+static  std::string change_dir(const std::string& path)
 {
     return "cd " + path;
 }
 
-static  std::string EraseFile(const std::string& name)
+static  std::string erase_file(const std::string& name)
 {
     return "rm " + name;
 }
-static  std::string Create_directory_tree(const std::string& path)
+static  std::string create_directory_tree(const std::string& path)
 {
     return "mkdir -p " + path;
 }
 
-static  std::string CopyFile(const std::string& from, const std::string& to)
+static  std::string copy_file(const std::string& from, const std::string& to)
 {
     return "cp " + from + " " + to;
 }
 
-static  std::string CopyDir(const std::string& from, const std::string& to)
+static  std::string copy_dir(const std::string& from, const std::string& to)
 {
     return "cp -r " + from + " " + to;
 }
-static  std::string MoveFile(const std::string& from, const std::string& to)
+static  std::string move_file(const std::string& from, const std::string& to)
 {
     return "mv " + from + " " + to;
 }
-static  std::string Untar_rootfs_joined(const std::string& name, const std::string& untar_path)
+static  std::string un_tar_rootfs_joined(const std::string& name, const std::string& untar_path)
 {
     return "tar xfi " + name + " -C " + untar_path + "/   --same-owner --hard-dereference || :";
 }
 
-static  std::string Tar_rootfs(const std::string& filename)
+static  std::string tar_rootfs(const std::string& filename)
 {
     return "tar cf " + filename +" * --same-owner --hard-dereference || :";
 }
 
 
-static  std::string EraseDirectory(const std::string&  path)
+static  std::string erase_dir(const std::string&  path)
 {
     return "chmod -R 777 " + path + "&&  rm -rf " + path;
 }
@@ -75,7 +67,36 @@ static std::string echo(const std::string& txt)
     return "echo '" + txt + "'";
 }
 
+static std::string export_wsl_tar(const std::string& wsl_image_name, const std::string& tar_name)
+{
+    return "wsl.exe --export " + wsl_image_name + " " + tar_name;
+}
 
+static std::string docker_import(const std::string& tar_name, const dockerImage& dimage)
+{
+    return "docker import " + tar_name + " " + dimage.full_id;
+}
+
+
+static  std::string docker_pull(const dockerImage& dimage)
+{
+    return "docker pull " + dimage.full_id;
+}
+
+static  std::string docker_save(const dockerImage& dimage, const std::string& path)
+{
+    return "docker save " + dimage.full_id + " -o " + path;
+}
+
+static std::string docker_push(const dockerImage& dimage)
+{
+    return "docker push " + dimage.full_id;
+}
+
+static std::string docker_rmi()
+{
+    return "docker rmi -f $(docker images -q)";
+}
 ComposedCommand downloadDockerImage(const std::string& windowsPath, const std::string& temporaryLinuxPath, const std::string filename,  const dockerImage& dimage)
 {
     ComposedCommand cmd;
@@ -89,23 +110,39 @@ ComposedCommand downloadDockerImage(const std::string& windowsPath, const std::s
     };
 
     cmd.addCommand(echo("creating temporary paths..."));
-    cmd.addCommand(Create_directory_tree(temporaryLinuxPath));
-    cmd.addCommand(Create_directory_tree(extracted_path));
-    cmd.addCommand(Change_directory(temporaryLinuxPath));
+    cmd.addCommand(create_directory_tree(temporaryLinuxPath));
+    cmd.addCommand(create_directory_tree(extracted_path));
+    cmd.addCommand(change_dir(temporaryLinuxPath));
     cmd.addCommand(echo("Initializing docker..."));
-    cmd.addCommand(StartDockerService());
-    cmd.addCommand(DockerPull(dimage.full_id));
-    cmd.addCommand(DockerSave(dimage.full_id, "docker"));
+    cmd.addCommand(start_docker_service());
+    cmd.addCommand(docker_pull(dimage));
+    cmd.addCommand(docker_save(dimage, "docker"));
     cmd.addCommand(echo("Decompressing docker images..."));
-    cmd.addCommand(UnTar("docker"));
-    cmd.addCommand(UnTarAllFilesThatMatchesIntoFolder("*tar", temporaryLinuxPath, temporaryLinuxPath+"/extracted"));
-    cmd.addCommand(Change_directory(extracted_path));
+    cmd.addCommand(un_tar("docker"));
+    cmd.addCommand(un_tar_all_files_that_matches_into_folder("*tar", temporaryLinuxPath, temporaryLinuxPath+"/extracted"));
+    cmd.addCommand(change_dir(extracted_path));
     cmd.addCommand(echo("Creating WSL TAR"));
-    cmd.addCommand(Tar_rootfs(filename));
+    cmd.addCommand(tar_rootfs(filename));
     cmd.addCommand(echo("Moving WSL TAR into Windows FS: "+windowsPath));
-    cmd.addCommand(MoveFile(filename, toWslPath(windowsPath)));
+    cmd.addCommand(move_file(filename, toWslPath(windowsPath)));
     cmd.addCommand(echo("Cleanup"));
-    cmd.addCommand(EraseDirectory(temporaryLinuxPath));
+    cmd.addCommand(erase_dir(temporaryLinuxPath));
+    cmd.addCommand(docker_rmi());
 
     return cmd;
+}
+
+ComposedCommand wsl_to_docker(const std::string& temporaryLinuxPath, const std::string distro_name, const dockerImage& dimage)
+{
+        ComposedCommand cmd;
+        std::string distro_name_tar = distro_name + ".tar.gz";
+        cmd.addCommand(create_directory_tree(temporaryLinuxPath));
+        cmd.addCommand(change_dir(temporaryLinuxPath));
+        cmd.addCommand(start_docker_service());
+        cmd.addCommand(export_wsl_tar(distro_name, distro_name_tar));
+        cmd.addCommand(docker_import(distro_name_tar, dimage));
+        cmd.addCommand(docker_push(dimage));
+        cmd.addCommand(docker_rmi());
+        cmd.addCommand(erase_dir(temporaryLinuxPath));
+        return cmd;
 }

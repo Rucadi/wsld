@@ -8,12 +8,13 @@ static cxxopts::Options options = []()
 {
     cxxopts::Options opp("Wsld", "Install docker images as wsl images on windows");
     opp.add_options()
-        ("d,distro", "Name to give the new distro", cxxopts::value<std::string>()) // a bool parameter
+        ("d,distro", "Name to give the new distro", cxxopts::value<std::string>())
         ("i,image", "Docker Image name", cxxopts::value<std::string>())
         ("r,remove", "Distro name to remove", cxxopts::value<std::string>())
         ("l,login", "Try to login docker")
         ("u,user", "Docker username", cxxopts::value<std::string>())
         ("p,password", "Docker password", cxxopts::value<std::string>())
+        ("t,transfer", "Uploads an wsl distribution to dockerhub, you need to be signed in")
         ("v,verbose", "Verbose output", cxxopts::value<bool>()->default_value("false"));
     return opp;
 }();
