@@ -45,6 +45,7 @@ wsld.exe -d qemu_d -i tianon/qemu
   -u, --user arg      Docker username
   -p, --password arg  Docker password
   -v, --verbose       Verbose output
+  -t, --transfer      if you logged in into docker, you can upload an wsl image to docker using -d -i as inputs
 
 ~~~
 
