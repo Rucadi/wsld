@@ -27,10 +27,10 @@ you must create a file:
 /etc/wsl.conf
 
 with the content:
-``
+```
 [user]
 default=<username default account>
-``
+```
 
 With this, when you upload and reimport an image, the default user configuration will be stored.
 
