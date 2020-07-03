@@ -13,7 +13,7 @@
 #include<Windows.h>
 
 #pragma comment(lib, "urlmon.lib")
-
+unsigned int  session = []() {    std::random_device rd; std::mt19937 mt(rd()); return mt(); }();
 
 void importDistro(std::string name, std::filesystem::path tarDir, std::filesystem::path installDir, int version=2, bool removeTar = true)
 {
@@ -29,7 +29,6 @@ void importDistro(std::string name, std::filesystem::path tarDir, std::filesyste
 
 void installDockerImageAsWsld()
 {
-    unsigned int  session = rand();
 
     std::string new_distro_name = getParsedOptions()["distro"].as<std::string>();
     std::string tarname = new_distro_name + std::to_string(session) + ".tar.gz";
@@ -66,8 +65,6 @@ static void dockerLogin(const std::string& username, const std::string& password
 
 static void uploadWslToDockerhub()
 {
-    unsigned int  session = rand();
-
     std::string distro_name = getParsedOptions()["distro"].as<std::string>();
     std::string tarname = distro_name + std::to_string(session) + ".tar.gz";
     std::string imagename = getParsedOptions()["image"].as<std::string>();
@@ -81,7 +78,6 @@ static void uploadWslToDockerhub()
 
     std::cout << "wsl to docker" << std::endl;
     auto cmd = wsl_to_docker(std::string("/tmp/wsld/") + std::to_string(session), distro_name, dockerImage(imagename));
-    std::wcout << cmd.getCommandSequence() << std::endl;
     Wsl::Launch("wsld", cmd);
     std::cout << "launched" << std::endl;
 }

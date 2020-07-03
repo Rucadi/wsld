@@ -19,6 +19,7 @@ static cxxopts::Options options = []()
     return opp;
 }();
 
+extern unsigned int  session;
 
 static cxxopts::ParseResult& getParsedOptions(int argc = 0, char** argv = nullptr)
 {

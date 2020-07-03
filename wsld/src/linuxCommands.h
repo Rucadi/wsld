@@ -83,6 +83,21 @@ static  std::string docker_pull(const dockerImage& dimage)
     return "docker pull " + dimage.full_id;
 }
 
+static std::string docker_container_create(const dockerImage& dimage, const std::string& tmpContainer)
+{
+    return "docker container create --name " + tmpContainer + " " + dimage.full_id;
+}
+
+static std::string docker_container_export(const std::string& container, const std::string& tar)
+{
+    return "docker export " + container + " -o " + tar;
+}
+
+static std::string docker_container_rm(const std::string& container)
+{
+    return "docker container rm " + container;
+
+}
 static  std::string docker_save(const dockerImage& dimage, const std::string& path)
 {
     return "docker save " + dimage.full_id + " -o " + path;
@@ -97,11 +112,17 @@ static std::string docker_rmi()
 {
     return "docker rmi -f $(docker images -q)";
 }
+
+static std::string docker_rmi(const dockerImage& dimage)
+{
+    return "docker rmi -f " + dimage.full_id;
+}
+
 ComposedCommand downloadDockerImage(const std::string& windowsPath, const std::string& temporaryLinuxPath, const std::string filename,  const dockerImage& dimage)
 {
     ComposedCommand cmd;
     std::string extracted_path = temporaryLinuxPath + "/extracted";
-    
+    std::string session_id = std::to_string(session);
     auto toWslPath = [](std::string wp)
     {
         std::string append = "| sed -e 's|\\\\|/|g' -e 's|^\\([A-Za-z]\\)\\:/\\(.*\\)|/mnt/\\L\\1\\E/\\2|'";
@@ -115,19 +136,13 @@ ComposedCommand downloadDockerImage(const std::string& windowsPath, const std::s
     cmd.addCommand(change_dir(temporaryLinuxPath));
     cmd.addCommand(echo("Initializing docker..."));
     cmd.addCommand(start_docker_service());
-    cmd.addCommand(docker_pull(dimage));
-    cmd.addCommand(docker_save(dimage, "docker"));
-    cmd.addCommand(echo("Decompressing docker images..."));
-    cmd.addCommand(un_tar("docker"));
-    cmd.addCommand(un_tar_all_files_that_matches_into_folder("*tar", temporaryLinuxPath, temporaryLinuxPath+"/extracted"));
-    cmd.addCommand(change_dir(extracted_path));
-    cmd.addCommand(echo("Creating WSL TAR"));
-    cmd.addCommand(tar_rootfs(filename));
-    cmd.addCommand(echo("Moving WSL TAR into Windows FS: "+windowsPath));
+    cmd.addCommand(docker_container_create(dimage, session_id));
+    cmd.addCommand(docker_container_export(session_id, filename));
+    cmd.addCommand(docker_container_rm(session_id));
     cmd.addCommand(move_file(filename, toWslPath(windowsPath)));
     cmd.addCommand(echo("Cleanup"));
     cmd.addCommand(erase_dir(temporaryLinuxPath));
-    cmd.addCommand(docker_rmi());
+    cmd.addCommand(docker_rmi(dimage));
 
     return cmd;
 }
@@ -142,7 +157,7 @@ ComposedCommand wsl_to_docker(const std::string& temporaryLinuxPath, const std::
         cmd.addCommand(export_wsl_tar(distro_name, distro_name_tar));
         cmd.addCommand(docker_import(distro_name_tar, dimage));
         cmd.addCommand(docker_push(dimage));
-        cmd.addCommand(docker_rmi());
+        cmd.addCommand(docker_rmi(dimage));
         cmd.addCommand(erase_dir(temporaryLinuxPath));
         return cmd;
 }
