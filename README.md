@@ -18,6 +18,22 @@ this allows you to install private repos!
 1. WSL 2 Installed  
 2. A default WSL image
 
+# Persistent accounts when importing docker images
+
+When you import an image to WSL, usually, the root user is the default user. 
+If you want to change this behaviour, and have it persistent when you upload your images into docker hub, (or export it manually)
+you must create a file:
+
+/etc/wsl.conf
+
+with the content:
+``
+[user]
+default=<username default account>
+``
+
+With this, when you upload and reimport an image, the default user configuration will be stored.
+
 # Usage
 
 The usual command you want to do is:  
