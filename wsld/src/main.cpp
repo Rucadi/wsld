@@ -46,6 +46,7 @@ void installDockerImageAsWsld()
     auto tarpath = getTempDirPath() /= tarname;
     auto installpath = getProgramDataPath(new_distro_name);
     importDistro(new_distro_name, tarpath, installpath);
+
 }
 
 

@@ -2,6 +2,7 @@
 #include <string>
 #include "composedCommand.h"
 #include "dockerUtils.h"
+#include <string>
 static  std::string start_docker_service()
 {
     return "service docker start";
@@ -85,7 +86,7 @@ static  std::string docker_pull(const dockerImage& dimage)
 
 static std::string docker_container_create(const dockerImage& dimage, const std::string& tmpContainer)
 {
-    return "docker container create --name " + tmpContainer + " " + dimage.full_id;
+    return "docker container create --name " + tmpContainer + " " + dimage.full_id+ " .";
 }
 
 static std::string docker_container_export(const std::string& container, const std::string& tar)
@@ -118,6 +119,48 @@ static std::string docker_rmi(const dockerImage& dimage)
     return "docker rmi -f " + dimage.full_id;
 }
 
+
+static std::string useradd(const std::string& user)
+{
+    return "useradd " + user;
+}
+
+static std::string chpasswd(const std::string& user, const std::string& password)
+{
+    return "echo '" + user + ":" + password + "' | chpasswd";
+}
+
+static std::string create_home(const std::string& user)
+{
+    return create_directory_tree("/home/" + user);
+}
+
+
+
+static std::string set_home_ownership(const std::string& user)
+{
+    return "chown -R "+user+" /home/"+user;
+}
+
+static std::string set_home_permissions(const std::string& user)
+{
+    return "chmod 751 -R /home/" + user;
+}
+
+static std::string setWslDefaultUser(const std::string& user)
+{
+    return "echo [\"user\"] > /etc/wsl.conf && echo default=" + user+" >>/etc/wsl.conf";
+}
+
+static std::string setDefaultBash(const std::string& user)
+{
+    return "chsh -s /bin/bash " + user;
+}
+
+static std::string skel(const std::string& user)
+{
+    return std::string("cp -nr /etc/skel/. ") + std::string("/home/") + user;
+}
 ComposedCommand downloadDockerImage(const std::string& windowsPath, const std::string& temporaryLinuxPath, const std::string filename,  const dockerImage& dimage)
 {
     ComposedCommand cmd;
@@ -129,13 +172,14 @@ ComposedCommand downloadDockerImage(const std::string& windowsPath, const std::s
         std::string ecp = "$(echo \"" +wp + std::string("\" ") + append + ")";
         return ecp;
     };
+    cmd.addCommand(start_docker_service());
+    cmd.addCommand(start_docker_service());
 
     cmd.addCommand(echo("creating temporary paths..."));
     cmd.addCommand(create_directory_tree(temporaryLinuxPath));
     cmd.addCommand(create_directory_tree(extracted_path));
     cmd.addCommand(change_dir(temporaryLinuxPath));
     cmd.addCommand(echo("Initializing docker..."));
-    cmd.addCommand(start_docker_service());
     cmd.addCommand(docker_container_create(dimage, session_id));
     cmd.addCommand(docker_container_export(session_id, filename));
     cmd.addCommand(docker_container_rm(session_id));
@@ -160,4 +204,21 @@ ComposedCommand wsl_to_docker(const std::string& temporaryLinuxPath, const std::
         cmd.addCommand(docker_rmi(dimage));
         cmd.addCommand(erase_dir(temporaryLinuxPath));
         return cmd;
+}
+
+
+
+
+ComposedCommand create_user(const std::string& id, const std::string& pw)
+{
+    ComposedCommand cmd;
+    cmd.addCommand(useradd(id));
+    cmd.addCommand(create_home(id));
+    cmd.addCommand(skel(id));
+    cmd.addCommand(set_home_ownership(id));
+    cmd.addCommand(set_home_permissions(id));
+    cmd.addCommand(chpasswd(id, pw));
+    cmd.addCommand(setDefaultBash(id));
+    cmd.addCommand(setWslDefaultUser(id));
+    return cmd;
 }
