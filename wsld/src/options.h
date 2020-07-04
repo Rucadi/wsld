@@ -40,6 +40,7 @@ static std::filesystem::path getProgramDataPath(std::string distro_name)
 
     if (!std::filesystem::exists(path))
         std::filesystem::create_directories(path);
+
     return path;
 }
 
