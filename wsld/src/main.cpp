@@ -43,7 +43,7 @@ void installDockerImageAsWsld()
     Wsl::Launch("wsld", cmd);
 
     auto tarpath = getTempDirPath() /= tarname;
-    auto userDefinedPath = std::filesystem::path(getParsedOptions()["onto"].as<std::string>() +"/"+ new_distro_name);
+    auto userDefinedPath = std::filesystem::path(getParsedOptions()["onto"].as<std::string>() +"/"+ new_distro_name); 
     auto installpath = userDefinedPath==""? getProgramDataPath(new_distro_name) : userDefinedPath;
     importDistro(new_distro_name, tarpath, installpath);
 
