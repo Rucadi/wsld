@@ -38,7 +38,6 @@ namespace Wsl
 			WslLaunch(distro.data(), command.data(), false, GetStdHandle(0), GetStdHandle(1), GetStdHandle(2), &newProcess);
 
 		WaitForSingleObject(newProcess, INFINITE);
-		std::cout << std::endl;
 		CloseHandle(newProcess);
 		return true;
 	}

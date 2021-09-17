@@ -33,7 +33,6 @@ void installDockerImageAsWsld()
     std::string new_distro_name = getParsedOptions()["distro"].as<std::string>();
     std::string tarname = new_distro_name + std::to_string(session) + ".tar.gz";
     std::string imagename = getParsedOptions()["image"].as<std::string>();
-
     if (Wsl::IsDistributionRegistered(new_distro_name))
     {
         std::cerr << "A distro named: " << new_distro_name << " already exists" << std::endl;
@@ -44,7 +43,8 @@ void installDockerImageAsWsld()
     Wsl::Launch("wsld", cmd);
 
     auto tarpath = getTempDirPath() /= tarname;
-    auto installpath = getProgramDataPath(new_distro_name);
+    auto userDefinedPath = std::filesystem::path(getParsedOptions()["onto"].as<std::string>() +"/"+ new_distro_name);
+    auto installpath = userDefinedPath==""? getProgramDataPath(new_distro_name) : userDefinedPath;
     importDistro(new_distro_name, tarpath, installpath);
 
 }
