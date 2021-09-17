@@ -58,6 +58,7 @@ wsld.exe -d qemu_d -i tianon/qemu
   -i, --image arg     Docker Image name
   -r, --remove arg    Distro name to remove
   -l, --login         Try to login docker
+  -o, --onto          Select installation dir
   -u, --user arg      Docker username
   -p, --password arg  Docker password
   -v, --verbose       Verbose output
